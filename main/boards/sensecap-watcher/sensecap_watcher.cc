@@ -2,6 +2,7 @@
 #include "misc/lv_event.h"
 #include "wifi_board.h"
 #include "sensecap_audio_codec.h"
+#include "settings.h"
 #include "display/lcd_display.h"
 #include "application.h"
 #include "knob.h"
@@ -491,6 +492,75 @@ private:
             .context =this
         };
         ESP_ERROR_CHECK(esp_console_cmd_register(&cmd5));
+
+        // Command to set/get websocket URL for custom server
+        const esp_console_cmd_t cmd6 = {
+            .command = "websocket_url",
+            .help = "Set or get websocket URL. Usage: websocket_url [url]",
+            .hint = NULL,
+            .func = [](int argc, char** argv) -> int {
+                Settings settings("websocket", true);
+                if (argc > 1) {
+                    settings.SetString("url", argv[1]);
+                    printf("WebSocket URL set to: %s\n", argv[1]);
+                    printf("Reboot to apply changes.\n");
+                } else {
+                    std::string url = settings.GetString("url");
+                    if (url.empty()) {
+                        printf("WebSocket URL: (not set, using OTA server config)\n");
+                    } else {
+                        printf("WebSocket URL: %s\n", url.c_str());
+                    }
+                }
+                return 0;
+            },
+            .argtable = NULL
+        };
+        ESP_ERROR_CHECK(esp_console_cmd_register(&cmd6));
+
+        // Command to set/get OTA URL
+        const esp_console_cmd_t cmd7 = {
+            .command = "ota_url",
+            .help = "Set or get OTA URL. Usage: ota_url [url]",
+            .hint = NULL,
+            .func = [](int argc, char** argv) -> int {
+                Settings settings("wifi", true);
+                if (argc > 1) {
+                    settings.SetString("ota_url", argv[1]);
+                    printf("OTA URL set to: %s\n", argv[1]);
+                } else {
+                    std::string url = settings.GetString("ota_url");
+                    if (url.empty()) {
+                        printf("OTA URL: (default)\n");
+                    } else {
+                        printf("OTA URL: %s\n", url.c_str());
+                    }
+                }
+                return 0;
+            },
+            .argtable = NULL
+        };
+        ESP_ERROR_CHECK(esp_console_cmd_register(&cmd7));
+
+        // Command to set websocket token
+        const esp_console_cmd_t cmd8 = {
+            .command = "websocket_token",
+            .help = "Set websocket auth token. Usage: websocket_token [token]",
+            .hint = NULL,
+            .func = [](int argc, char** argv) -> int {
+                Settings settings("websocket", true);
+                if (argc > 1) {
+                    settings.SetString("token", argv[1]);
+                    printf("WebSocket token set.\n");
+                } else {
+                    std::string token = settings.GetString("token");
+                    printf("WebSocket token: %s\n", token.empty() ? "(not set)" : "(set)");
+                }
+                return 0;
+            },
+            .argtable = NULL
+        };
+        ESP_ERROR_CHECK(esp_console_cmd_register(&cmd8));
 
         esp_console_dev_uart_config_t hw_config = ESP_CONSOLE_DEV_UART_CONFIG_DEFAULT();
         ESP_ERROR_CHECK(esp_console_new_repl_uart(&hw_config, &repl_config, &repl));
