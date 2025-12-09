@@ -380,9 +380,11 @@ ls /dev/ttyUSB* /dev/ttyACM*
 picocom -b 115200 /dev/ttyUSB0
 
 # In the SenseCAP console:
-SenseCAP> websocket_url wss://your-kva8-server:8765
+SenseCAP> websocket_url ws://100.67.42.36:8765/ws
 SenseCAP> reboot
 ```
+
+**Note:** Server is on primecore4 (100.67.42.36), container: /spark-watcher-server
 
 ### Step 3: Verify Connection
 
